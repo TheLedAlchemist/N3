@@ -4,9 +4,15 @@ import equinox as eqx
 
 from jax.typing import ArrayLike
 from jaxtyping import PRNGKeyArray, Float
+from typing import Protocol, runtime_checkable
 
 from n3.architecture.controller import ControllerLike
 from n3.utils.utils import control_to_mask
+
+
+@runtime_checkable
+class ModelLike(Protocol):
+    def __call__(self, x: ArrayLike, control: ControllerLike) -> ArrayLike: ...
 
 
 class N3(eqx.Module):
