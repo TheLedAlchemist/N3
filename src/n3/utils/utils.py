@@ -1,8 +1,9 @@
 from functools import partial
 import jax
 import jax.numpy as jnp
+import equinox as eqx
 
-from jaxtyping import Float, Array
+from jaxtyping import Float, Array, PyTree
 
 
 @partial(jax.jit, static_argnames="N")
@@ -38,3 +39,10 @@ def control_to_mask(control_value: Float[Array, ""], N: int) -> Float[Array, "N"
     )
 
     return mask
+
+
+@eqx.filter_jit()
+def grad_norm(grads: PyTree) -> Float[Array, ""]:
+    return jnp.sqrt(
+        sum(jnp.sum(jnp.square(p)) for p in jax.tree_util.tree_leaves(grads))
+    )
