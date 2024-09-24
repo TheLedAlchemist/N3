@@ -10,6 +10,8 @@ dependencies = [
     "jax[cuda12]>=0.4.33",
     "jaxtyping>=0.2.34",
     "optax>=0.2.3",
+    "scikit-learn>=1.5.2",
+    "scipy>=1.14.1",
 ]
 
 [project.optional-dependencies]
@@ -23,5 +25,14 @@ notebook = [
     "jupyterlab>=4.2.5",
 ]
 richtext = [
+    "ipywidgets>=8.1.5",
     "tqdm>=4.66.5",
 ]
+
+[tool.ruff.lint]
+# syntax error in forward annotation broken by jaxtyping
+ignore = ["F722", "F821"]
+
+[tool.pyright]
+python.venvPath = ".venv"
+reportMissingImports = "warning"
