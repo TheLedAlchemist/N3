@@ -1,0 +1,27 @@
+[project]
+name = "n3"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "beartype>=0.18.5",
+    "equinox>=0.11.7",
+    "jax[cuda12]>=0.4.33",
+    "jaxtyping>=0.2.34",
+    "optax>=0.2.3",
+]
+
+[project.optional-dependencies]
+plotting = [
+    "matplotlib>=3.9.2",
+    "seaborn>=0.13.2",
+]
+notebook = [
+    "ipython>=8.27.0",
+    "jupyter>=1.1.1",
+    "jupyterlab>=4.2.5",
+]
+richtext = [
+    "tqdm>=4.66.5",
+]

@@ -1,0 +1,24 @@
+fail_fast: true
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.4
+    hooks:
+      - id: ruff # linter
+        types_or: [python, pyi, jupyter, toml]
+        args: [--fix]
+      - id: ruff-format # formatter
+        types_or: [python, pyi, jupyter, toml]
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.380
+    hooks:
+      - id: pyright
+        additional_dependencies:
+          [
+            beartype,
+            einops,
+            jax,
+            jaxtyping,
+            optax,
+            pytest,
+            typing_extensions,
+          ]
