@@ -1,5 +1,6 @@
 import jax
 import jax.numpy as jnp
+import numpy as np
 import equinox as eqx
 
 from jaxtyping import Float, Array, Int
@@ -17,6 +18,21 @@ def accuracy(
 ) -> Float[Array, ""]:
     logits = jax.vmap(model, in_axes=(0, None))(x, control)
     return jnp.mean(jnp.argmax(logits, axis=-1) == y)
+
+
+def confusion_matrix(
+    model: ModelLike,
+    control: ControllerLike,
+    x: Float[Array, "batch 2"],
+    y: Int[Array, "batch"],
+) -> Float[np.ndarray, "num_classes num_classes"]:
+    y_pred = jax.nn.softmax(jax.vmap(model, in_axes=(0, None))(x, control))
+    y_pred = np.argmax(y_pred, axis=-1)
+    n_classses = len(np.unique(y))
+    confusion_matrix = np.zeros((n_classses, n_classses))
+    for true, pred in zip(y, y_pred):
+        confusion_matrix[true, pred] += 1
+    return confusion_matrix
 
 
 @eqx.filter_jit

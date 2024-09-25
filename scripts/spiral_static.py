@@ -16,7 +16,7 @@ from jaxtyping import Float, Array, Int
 from n3.architecture.controller import IdentityController, ControllerLike
 from n3.architecture.model import N3, ModelLike
 from n3.utils.utils import grad_norm
-from n3.utils.metrics import accuracy, cross_entropy
+from n3.utils.metrics import accuracy, cross_entropy, confusion_matrix
 from n3.data import spiral
 
 
@@ -188,6 +188,7 @@ def main():
                 f"control2: {controls2[-1]:.4e}, Control_grad_norm: {control_grad_norms[-1]:.4e}"
             )
 
+    cmat = confusion_matrix(n3, control, x_test, y_test)
     # Save metrics
     np.savetxt(f"{args.out_path}epochs.txt", epoch_list)
     np.savetxt(f"{args.out_path}test_losses.txt", test_losses)
@@ -195,6 +196,7 @@ def main():
     np.savetxt(f"{args.out_path}train_losses.txt", train_losses)
     np.savetxt(f"{args.out_path}controls2.txt", controls2)
     np.savetxt(f"{args.out_path}control_grad_norms.txt", control_grad_norms)
+    np.savetxt(f"{args.out_path}confusion_matrix.txt", cmat)
 
 
 if __name__ == "__main__":
