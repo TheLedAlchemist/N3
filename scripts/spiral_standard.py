@@ -10,21 +10,25 @@ import equinox as eqx
 import optax
 from sklearn.preprocessing import MinMaxScaler
 
-from jaxtyping import Float, Array
+from jaxtyping import Float, Array, Int
 
 
 from n3.architecture.controller import StandardController, ControllerLike
 from n3.architecture.model import N3, ModelLike
-from n3.data import bessel
 from n3.utils.utils import grad_norm
+from n3.utils.metrics import accuracy, cross_entropy
+from n3.data import spiral
 
 
 def argument_parser():
     parser = argparse.ArgumentParser(
-        description="Runner for N3 regression on Bessel function dataset."
+        description="Runner for N3 classification on spirals dataset."
     )
     parser.add_argument(
         "--n_samples", type=int, default=2**15, help="Number of samples to generate"
+    )
+    parser.add_argument(
+        "--n_classes", type=int, default=5, help="Number of classes to generate"
     )
     parser.add_argument(
         "--test_size",
@@ -65,11 +69,12 @@ def argument_parser():
 def compute_base_loss(
     model: ModelLike,
     control: ControllerLike,
-    x: Float[Array, "batch 1"],
-    y: Float[Array, "batch 1"],
+    x: Float[Array, "batch 2"],
+    y: Int[Array, "batch"],
 ) -> Float[Array, ""]:
-    pred = jax.vmap(model, in_axes=(0, None))(x, control)
-    return jnp.mean((pred - y) ** 2)
+    pred_y = jax.nn.log_softmax(jax.vmap(model, in_axes=(0, None))(x, control))
+    loss = cross_entropy(y, pred_y)
+    return loss
 
 
 def compute_size_loss(
@@ -84,8 +89,8 @@ def make_step(
     model: ModelLike,
     controller: ControllerLike,
     size_influence: float,
-    x: Float[Array, "batch 1"],
-    y: Float[Array, "batch 1"],
+    x: Float[Array, "batch 2"],
+    y: Int[Array, "batch"],
     optim: optax.GradientTransformation,
     opt_state: optax.OptState,
 ) -> tuple[Float[Array, ""], ModelLike, ControllerLike, optax.OptState]:
@@ -109,8 +114,8 @@ def test_step(
     model: ModelLike,
     controller: ControllerLike,
     size_influence: float,
-    x: Float[Array, "batch 1"],
-    y: Float[Array, "batch 1"],
+    x: Float[Array, "batch 2"],
+    y: Int[Array, "batch"],
 ) -> Float[Array, ""]:
     return compute_base_loss(model, controller, x, y) + compute_size_loss(
         controller, size_influence
@@ -134,8 +139,9 @@ def main():
         logger.addHandler(console_handler)
 
     # Dataset
-    x_train, x_test, y_train, y_test = bessel.generate_data(
+    x_train, x_test, y_train, y_test = spiral.generate_data(
         n_samples=args.n_samples,
+        num_classes=args.n_classes,
         test_size=args.test_size,
         scaler=MinMaxScaler(feature_range=(-1, 1)),
         seed=args.seed,
@@ -143,7 +149,7 @@ def main():
 
     # Model and Controller
     model_key, control_key = jax.random.split(jax.random.PRNGKey(args.seed))
-    n3 = N3(1, 1, [args.N_max], model_key)
+    n3 = N3(2, args.n_classes, [args.N_max], model_key)
     control = StandardController(1, control_key)  # this line defines the growing nature
 
     optim = optax.adam(learning_rate=args.learning_rate)
@@ -152,6 +158,7 @@ def main():
     # Training loop
     epoch_list = []
     test_losses = []
+    test_accuracies = []
     train_losses = []
     controls2 = []
     control_grad_norms = []
@@ -164,8 +171,9 @@ def main():
         if epoch % args.log_every == 0:
             epoch_list.append(epoch)
             test_loss = test_step(n3, control, args.size_influence, x_test, y_test)
-
+            test_accuracy = accuracy(n3, control, x_test, y_test)
             test_losses.append(test_loss)
+            test_accuracies.append(test_accuracy)
             train_losses.append(train_loss)
             controls2.append(control.params.item() ** 2)
             control_grad_norms.append(
@@ -174,13 +182,16 @@ def main():
                 )
             )
             logger.info(
-                f"epoch: {epoch_list[-1]}, train_loss: {train_losses[-1]:.4e}, test_loss: {test_losses[-1]:.4e} control2: {controls2[-1]:.4e}"
+                f"epoch: {epoch_list[-1]}, train_loss: {train_losses[-1]:.4e}, test_loss: {test_losses[-1]:.4e}, test_accuracy: {test_accuracies[-1]:.4f}"
             )
-            logger.info(f"Control_grad_norm: {control_grad_norms[-1]:.4e}")
+            logger.info(
+                f"control2: {controls2[-1]:.4e}, Control_grad_norm: {control_grad_norms[-1]:.4e}"
+            )
 
     # Save metrics
     np.savetxt(f"{args.out_path}epochs.txt", epoch_list)
     np.savetxt(f"{args.out_path}test_losses.txt", test_losses)
+    np.savetxt(f"{args.out_path}test_accuracies.txt", test_accuracies)
     np.savetxt(f"{args.out_path}train_losses.txt", train_losses)
     np.savetxt(f"{args.out_path}controls2.txt", controls2)
     np.savetxt(f"{args.out_path}control_grad_norms.txt", control_grad_norms)
