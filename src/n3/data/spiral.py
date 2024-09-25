@@ -4,12 +4,12 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
-from jaxtyping import Array, PRNGKeyArray, Float
+from jaxtyping import Array, PRNGKeyArray, Float, Int
 
 
 def create_spiral_dataset(
     key: PRNGKeyArray, n_samples: int, num_classes: int
-) -> tuple[Float[Array, "n_samples 2"], Float[Array, "n_samples"]]:
+) -> tuple[Float[Array, "n_samples 2"], Int[Array, "n_samples"]]:
     """
     Create a multi-class 2D spiral dataset.
 
@@ -53,7 +53,12 @@ def generate_data(
     test_size: float = 0.2,
     scaler: MinMaxScaler = MinMaxScaler(feature_range=(-1, 1)),
     seed: int = 0,
-):
+) -> tuple[
+    Float[Array, "train_samples 2"],
+    Float[Array, "test_samples 2"],
+    Int[Array, "train_samples"],
+    Int[Array, "test_samples"],
+]:
     key = jax.random.PRNGKey(seed)
     x, labels = create_spiral_dataset(key, n_samples, num_classes)
 
