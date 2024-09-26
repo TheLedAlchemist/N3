@@ -153,7 +153,7 @@ def main():
     epoch_list = []
     test_losses = []
     train_losses = []
-    controls2 = []
+    controls = []
     control_grad_norms = []
 
     for epoch in range(args.epochs):
@@ -167,14 +167,14 @@ def main():
 
             test_losses.append(test_loss)
             train_losses.append(train_loss)
-            controls2.append(control.params.item() ** 2)
+            controls.append(control.params.item())
             control_grad_norms.append(
                 grad_norm(
                     eqx.filter_grad(compute_size_loss)(control, args.size_influence)
                 )
             )
             logger.info(
-                f"epoch: {epoch_list[-1]}, train_loss: {train_losses[-1]:.4e}, test_loss: {test_losses[-1]:.4e} control2: {controls2[-1]:.4e}"
+                f"epoch: {epoch_list[-1]}, train_loss: {train_losses[-1]:.4e}, test_loss: {test_losses[-1]:.4e} control: {controls[-1]:.4e}"
             )
             logger.info(f"Control_grad_norm: {control_grad_norms[-1]:.4e}")
 
@@ -182,7 +182,7 @@ def main():
     np.savetxt(f"{args.out_path}epochs.txt", epoch_list)
     np.savetxt(f"{args.out_path}test_losses.txt", test_losses)
     np.savetxt(f"{args.out_path}train_losses.txt", train_losses)
-    np.savetxt(f"{args.out_path}controls2.txt", controls2)
+    np.savetxt(f"{args.out_path}controls.txt", controls)
     np.savetxt(f"{args.out_path}control_grad_norms.txt", control_grad_norms)
 
 

@@ -14,7 +14,7 @@ def control_to_mask(control_value: Float[Array, ""], N: int) -> Float[Array, "N"
     The intermediate element takes a fractional value.
     """
     # Compute mask_param using vectorized operations
-    mask_param = jnp.sin((jnp.pi / 2) * control_value**2) ** 2
+    mask_param = jnp.sin((jnp.pi / 2) * control_value) ** 2
     total_full_ones = jnp.floor(mask_param * N).astype(int)
     fractional_part = mask_param * N - total_full_ones
 
