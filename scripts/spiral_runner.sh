@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Define the number of seeds and the number of parallel jobs
-NUM_SEEDS=50
-PARALLEL_JOBS=5
+NUM_SEEDS=100
+PARALLEL_JOBS=20
 
 # Define the paths to the Python scripts
 SPIRAL_STATIC_SCRIPT="./scripts/spiral_static.py"
