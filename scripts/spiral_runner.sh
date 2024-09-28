@@ -3,6 +3,7 @@
 # Define the number of seeds and the number of parallel jobs
 NUM_SEEDS=100
 PARALLEL_JOBS=20
+PLATFORM="cpu"
 
 # Define the paths to the Python scripts
 SPIRAL_STATIC_SCRIPT="./scripts/spiral_static.py"
@@ -17,7 +18,7 @@ run_script() {
     local seed=$2
     local output_dir=$3
     mkdir -p $output_dir
-    JAX_PLATFORM_NAME=cpu python $script --seed $seed --out_path $output_dir
+    JAX_PLATFORM_NAME=$PLATFORM python $script --seed $seed --out_path $output_dir
 }
 
 export -f run_script
