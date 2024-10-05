@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+title: Nimble Neural Networks
+message: Please cite this software using these metadata.
+type: software
+authors:
+  - given-names: Anil
+    family-names: Radhakrishnan
+    email: aradhak5@ncsu.edu
+    affiliation: North Carolina State University
+    orcid: 'https://orcid.org/0000-0002-8084-9527'
+  - given-names: John
+    family-names: Lindner
+    name-particle: F
+    email: jflindne@ncsu.edu
+    affiliation: North Carolina State University
+  - given-names: Scott
+    name-particle: T
+    family-names: Miller
+    email: stmille3@ncsu.edu
+    affiliation: North Carolina State University
+  - given-names: Sudeshna
+    family-names: Sinha
+    email: sudeshna@iisermohali.ac.in
+    affiliation: >-
+      Indian Institute of Science Education and Research
+      Mohali
+    orcid: 'https://orcid.org/0000-0002-1364-5276'
+  - given-names: William
+    name-particle: L
+    family-names: Ditto
+    email: wditto@ncsu.edu
+    affiliation: North Carolina State Universty
+    orcid: 'https://orcid.org/0000-0002-7416-8012'
+repository-code: 'https://github.com/NonlinearArtificialIntelligenceLab/N3'
+abstract: >-
+  JAX implementation of Nimble Neural Networks
+  controller-mlp architecture
+keywords:
+  - Machine Learning
+  - Nonlinear
+license: MIT
