@@ -23,7 +23,7 @@ Anil Radhakrishnan, John F. Lindner, Scott T. Miller, Sudeshna Sinha, William L.
 ### Installation
 We recommend using [uv](https://docs.astral.sh/uv/) to manage python and install the package.
 
-Using uv, you can simply git clone the repository and run,
+Then, you can simply git clone the repository and run,
 
 ```bash
 uv pip install .
