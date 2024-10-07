@@ -40,6 +40,8 @@ To run the scripts, you can use the `uv run` command to run the scripts in the `
 
 The analysis of the statistical run results can be done using the `analysis` notebook in the `nbs` directory.
 
+The mathematica notebooks used for this work can be accessed in the `mathematica` directory.
+
 ### Code References
 - [Equinox](https://docs.kidger.site/equinox/) Pytorch like module for JAX
 - [JAX](https://github.com/jax-ml/jax) Accelerator-oriented array computation and program transformation
