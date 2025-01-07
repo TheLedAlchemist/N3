@@ -156,6 +156,9 @@ def main():
     controls = []
     control_grad_norms = []
 
+    # Test Variables are written as follows: [epoch, base_loss, learning_rate, num_epochs, size_influence]
+    learning_measurements = []
+
     for epoch in range(args.epochs):
         train_loss, n3, control, opt_state = make_step(
             n3, control, args.size_influence, x_train, y_train, optim, opt_state
@@ -164,6 +167,9 @@ def main():
         if epoch % args.log_every == 0:
             epoch_list.append(epoch)
             test_loss = test_step(n3, control, args.size_influence, x_test, y_test)
+
+            # Store the observed measurements in a list
+            learning_measurements.append([epoch, compute_base_loss(n3, control, x_test, y_test), args.learning_rate, args.epochs, args.size_influence])
 
             test_losses.append(test_loss)
             train_losses.append(train_loss)
@@ -184,6 +190,18 @@ def main():
     np.savetxt(f"{args.out_path}train_losses.txt", train_losses)
     np.savetxt(f"{args.out_path}controls.txt", controls)
     np.savetxt(f"{args.out_path}control_grad_norms.txt", control_grad_norms)
+
+    measurement_file_exists = os.path.exists(f"{args.out_path}base_losses.csv")
+
+    # Test Variables are written as follows: [network_type,epoch, base_loss, learning_rate, num_epochs, size_influence]
+    with open(f"{args.out_path}base_losses.csv", "a") as f:
+        # If the measurement output file was just created, create the csv file header.
+        if(not measurement_file_exists):
+            f.write("Network_Type,Epoch,Base_Loss,Learning_Rate,Num_Epochs,Size_Influence\n")
+        
+        for i in range(len(learning_measurements)):
+            row_entry = learning_measurements[i]
+            f.write(f"Bessel_Growing,{row_entry[0]},{row_entry[1]},{row_entry[2]},{row_entry[3]},{row_entry[4]}\n")
 
 
 if __name__ == "__main__":

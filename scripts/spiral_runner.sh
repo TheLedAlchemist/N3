@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the number of seeds and the number of parallel jobs
-NUM_SEEDS=100
+NUM_SEEDS=2
 PARALLEL_JOBS=20
 PLATFORM="cpu"
 
