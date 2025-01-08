@@ -1,14 +1,14 @@
 #!/bin/bash
 
 #BSUB -n 10
-#BSUB -W 120
+#BSUB -W 720
 #BSUB -J besselTest
 #BSUB -o stdout.%J
 #BSUB -e stderr.%J
 
 # Define the number of seeds and the number of parallel jobs
 NUM_SEEDS=100
-MAX_LAMBDA=10.00
+MAX_LAMBDA=100.00
 PLATFORM="cpu"
 
 # Define the paths to the Python scripts
