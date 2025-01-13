@@ -33,14 +33,34 @@ run_script() {
 
 
 # Run the scripts for each seed in parallel
-static_output_dir="${OUTPUT_BASE_DIR}/BESSEL/"
-standard_output_dir="${OUTPUT_BASE_DIR}/BESSEL/"
+static_output_dir="${OUTPUT_BASE_DIR}/BESSEL"
+standard_output_dir="${OUTPUT_BASE_DIR}/BESSEL"
 
 for seed in $(seq 0 $((NUM_SEEDS - 1))); do
     echo "Begin training on seed $seed"
-    for i in $(seq 0.01 0.01 $MAX_LAMBDA); do
-	run_script $BESSEL_STATIC_SCRIPT $seed $static_output_dir $i
-	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_output_dir $i
+    
+    static_out_seed="$static_output_dir/SEED_${seed}/"
+    standard_out_seed="$standard_output_dir/SEED_${seed}/"
+
+    # Scanning logarithmically through e-2, e-1, e+0, e+1, e+2
+    for i in $(seq 0.01 0.01 0.1); do
+	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $i
+	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $i
+    done
+    
+    for i in $(seq 0.1 0.1 1.0); do
+	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $i
+	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $i
+    done
+    
+    for i in $(seq 1.0 1.0 10.0); do
+	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $i
+	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $i
+    done
+
+    for i in $(seq 10.0 10.0 100.0); do
+	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $i
+	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $i
     done
     echo "Finished training seed $seed"
 done
