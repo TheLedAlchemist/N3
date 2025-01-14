@@ -7,7 +7,7 @@
 #BSUB -e stderr.%J
 
 # Define the number of seeds and the number of parallel jobs
-NUM_SEEDS=100
+NUM_SEEDS=10
 MAX_LAMBDA=100.00
 PLATFORM="cpu"
 
