@@ -172,7 +172,7 @@ def main():
 
             # Store the observed measurements in a list
             learning_measurements.append(
-                [epoch, compute_base_loss(n3, control, x_test, y_test), compute_size_loss(n3, control, x_test, y_test),
+                [epoch, compute_base_loss(n3, control, x_test, y_test), compute_size_loss(control, args.size_influence),
                 control(jnp.ones((1,))), args.learning_rate, args.epochs, args.size_influence]
             )
 
