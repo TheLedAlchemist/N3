@@ -179,7 +179,10 @@ def main():
             test_accuracy = accuracy(n3, control, x_test, y_test)
 
             # Store the observed measurements in a list
-            learning_measurements.append([epoch, compute_base_loss(n3, control, x_test, y_test), args.learning_rate, args.epochs, args.size_influence])
+            learning_measurements.append(
+                [epoch, compute_base_loss(n3, control, x_test, y_test), compute_size_loss(n3, control, x_test, y_test),
+                control(jnp.ones((1,))), args.learning_rate, args.epochs, args.size_influence]
+            )
 
             test_losses.append(test_loss)
             test_accuracies.append(test_accuracy)
@@ -207,15 +210,18 @@ def main():
 
     measurement_file_exists = os.path.exists(f"{args.out_path}base_losses.csv")
 
-    # Test Variables are written as follows: [network_type,epoch, base_loss, learning_rate, num_epochs, size_influence]
+    # Output CSV Format includes the following measurements [epoch, base_loss, size_loss, hidden_layer_size, learning_rate, num_epochs, size_influence]
     with open(f"{args.out_path}base_losses.csv", "a") as f:
         # If the measurement output file was just created, create the csv file header.
         if(not measurement_file_exists):
-            f.write("Network_Type,Epoch,Base_Loss,Learning_Rate,Num_Epochs,Size_Influence\n")
+            f.write("Seed,Network_Type,N_max,Epoch,Base_Loss,Size_Loss,Hidden_Layer_Size,Learning_Rate,Num_Epochs,Size_Influence\n")
         
+        # Add a seed, network type, N_MAX to the output line.
         for i in range(len(learning_measurements)):
             row_entry = learning_measurements[i]
-            f.write(f"Spiral_Grown,{row_entry[0]},{row_entry[1]},{row_entry[2]},{row_entry[3]},{row_entry[4]}\n")
+            f.write(
+                f"{args.seed},Spiral_Grown,{args.N_max},{row_entry[0]},{row_entry[1]},{row_entry[2]},{row_entry[3]},{row_entry[4]},{row_entry[5]},{row_entry[6]}\n"
+            )
 
 
 
