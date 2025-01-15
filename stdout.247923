@@ -1,2 +1,118 @@
 Set the python path to: /share/pendulums/msgill/GrowingNetworks/N3/src:
 Begin training on seed 0
+Finished training seed 0
+Begin training on seed 1
+Finished training seed 1
+Begin training on seed 2
+Finished training seed 2
+Begin training on seed 3
+Finished training seed 3
+Begin training on seed 4
+Finished training seed 4
+Begin training on seed 5
+Finished training seed 5
+Begin training on seed 6
+Finished training seed 6
+Begin training on seed 7
+Finished training seed 7
+Begin training on seed 8
+Finished training seed 8
+Begin training on seed 9
+Finished training seed 9
+JOB COMPLETE
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@c029n01>
+Subject: Job 247923: <spiralTest> in cluster <Hazel> Done
+
+Job <spiralTest> was submitted from host <login04.hpc.ncsu.edu> by user <msgill> in cluster <Hazel> at Tue Jan 14 22:35:17 2025
+Job was executed on host(s) <4*c029n01>, in queue <single_chassis>, as user <msgill> in cluster <Hazel> at Tue Jan 14 22:35:19 2025
+                            <5*c034n02>
+                            <1*c039n01>
+</home/msgill> was used as the home directory.
+</share/pendulums/msgill/GrowingNetworks/N3> was used as the working directory.
+Started at Tue Jan 14 22:35:19 2025
+Terminated at Wed Jan 15 07:40:17 2025
+Results reported at Wed Jan 15 07:40:17 2025
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash
+
+#BSUB -n 10
+#BSUB -W 720
+#BSUB -J spiralTest
+#BSUB -o stdout.%J
+#BSUB -e stderr.%J
+
+# Define the number of seeds and the number of parallel jobs
+NUM_SEEDS=10
+MAX_LAMBDA=100.00
+PLATFORM="cpu"
+
+# Define the paths to the Python scripts
+SPIRAL_STATIC_SCRIPT="./scripts/spiral_static.py"
+SPIRAL_STANDARD_SCRIPT="./scripts/spiral_standard.py"
+
+# Define the base output directory
+OUTPUT_BASE_DIR="./output"
+
+export PYTHONPATH=$(pwd)/src:$PYTHONPATH
+echo "Set the python path to: $PYTHONPATH"
+
+# Function to run a Python script with a given seed and output directory
+run_script() {
+    local script=$1
+    local seed=$2
+    local output_dir=$3
+    local lambda=$4
+    mkdir -p $output_dir
+    JAX_PLATFORM_NAME=$PLATFORM python $script --seed $seed --out_path $output_dir --size_influence $lambda
+}
+
+
+# Run the scripts for each seed in parallel
+static_output_dir="${OUTPUT_BASE_DIR}/SPIRAL"
+standard_output_dir="${OUTPUT_BASE_DIR}/SPIRAL"
+
+for seed in $(seq 0 $((NUM_SEEDS - 1))); do
+    echo "Begin training on seed $seed"
+    
+    static_out_seed="$static_output_dir/SEED_${seed}/"
+    standard_out_seed="$standard_output_dir/SEED_${seed}/"
+
+    # Scanning logarithmically through e-2, e-1, e+0, e+1, e+2
+    for i in $(seq 0.01 0.01 0.1); do
+	run_script $SPIRAL_STATIC_SCRIPT $seed $static_out_seed $i
+	run_script $SPIRAL_STANDARD_SCRIPT $seed $standard_out_seed $i
+    done
+    
+
+(... more ...)
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   48361.00 sec.
+    Max Memory :                                 -
+    Average Memory :                             -
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   -
+    Max Processes :                              4
+    Max Threads :                                86
+    Run time :                                   32712 sec.
+    Turnaround time :                            32700 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file <stderr.247923> for stderr output of this job.
+
