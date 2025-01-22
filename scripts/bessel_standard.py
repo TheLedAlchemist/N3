@@ -146,7 +146,8 @@ def main():
     n3 = N3(1, 1, [args.N_max], model_key)
     control = StandardController(1, control_key)  # this line defines the growing nature
 
-    optim = optax.adam(learning_rate=args.learning_rate)
+    ## The optimizer -- vary with args?
+    optim = optax.sgd(learning_rate=args.learning_rate)
     opt_state = optim.init(eqx.filter([n3, control], eqx.is_inexact_array))
 
     # Training loop

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#BSUB -n 10
+#BSUB -n 50
 #BSUB -W 720
 #BSUB -J besselTest
 #BSUB -o stdout.%J
@@ -62,6 +62,7 @@ for seed in $(seq 0 $((NUM_SEEDS - 1))); do
 	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $i
 	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $i
     done
+    
     echo "Finished training seed $seed"
 done
 
