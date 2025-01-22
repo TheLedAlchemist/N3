@@ -7,8 +7,7 @@
 #BSUB -e stderr.%J
 
 # Define the number of seeds and the number of parallel jobs
-NUM_SEEDS=10
-MAX_LAMBDA=100.00
+NUM_SEEDS=50
 PLATFORM="cpu"
 
 # Define the paths to the Python scripts
@@ -42,27 +41,13 @@ for seed in $(seq 0 $((NUM_SEEDS - 1))); do
     static_out_seed="$static_output_dir/SEED_${seed}/"
     standard_out_seed="$standard_output_dir/SEED_${seed}/"
 
-    # Scanning logarithmically through e-2, e-1, e+0, e+1, e+2
-    for i in $(seq 0.01 0.01 0.1); do
-	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $i
-	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $i
-    done
-    
-    for i in $(seq 0.1 0.1 1.0); do
-	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $i
-	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $i
-    done
-    
-    for i in $(seq 1.0 1.0 10.0); do
-	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $i
-	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $i
+    # Scan through lambda logarithmically from 1e-2, 1e-1.99, ... , 0, ... , 1e+1.99, 1e+2
+    for i in $(seq -1.97 0.01 2.0); do
+	size_influence=$(awk "BEGIN {print 10^($i)}")
+	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $size_influence
+	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $size_influence
     done
 
-    for i in $(seq 10.0 10.0 100.0); do
-	run_script $BESSEL_STATIC_SCRIPT $seed $static_out_seed $i
-	run_script $BESSEL_STANDARD_SCRIPT $seed $standard_out_seed $i
-    done
-    
     echo "Finished training seed $seed"
 done
 
