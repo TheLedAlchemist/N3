@@ -195,10 +195,10 @@ def main():
     np.savetxt(f"{args.out_path}controls.txt", controls)
     np.savetxt(f"{args.out_path}control_grad_norms.txt", control_grad_norms)
 
-    measurement_file_exists = os.path.exists(f"{args.out_path}compact_measurements.csv")
+    measurement_file_exists = os.path.exists(f"{args.out_path}_grown_compact_measurements.csv")
 
     # Output CSV Format includes the following measurements [epoch, base_loss, size_loss, hidden_layer_size, learning_rate, num_epochs, size_influence]
-    with open(f"{args.out_path}compact_measurements.csv", "a") as f:
+    with open(f"{args.out_path}_grown_compact_measurements.csv", "a") as f:
         # If the measurement output file was just created, create the csv file header.
         if(not measurement_file_exists):
             f.write("Seed,Network_Type,N_max,Epoch,Base_Loss,Size_Loss,Hidden_Layer_Size,Learning_Rate,Num_Epochs,Size_Influence\n")
