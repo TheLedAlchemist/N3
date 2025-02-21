@@ -38,7 +38,7 @@ standard_output_dir="${OUTPUT_BASE_DIR}/BESSEL"
 
 for i in $(seq -2.0 0.01 2.0); do
     echo "Begin training on seed $seed"
-    
+
     static_out_seed="$static_output_dir/SEED_${seed}/"
     standard_out_seed="$standard_output_dir/SEED_${seed}/"
 
