@@ -8,6 +8,9 @@
 
 module load PrgEnv-intel
 
+# The number of nodes available to MPI
+MPI_NODES=2
+
 # The lambda values [ 10^MIN, 10^MAX ] to scan through.
 L_MIN=-2
 L_MAX=2
@@ -17,10 +20,15 @@ LEARNING_RATE=$(awk 'BEGIN{printf "%.3f\n", 0.001}')
 NUM_EPOCHS=10000
 MAX_HIDDEN_LAYER_SIZE=10
 
-# The number of times to sweep through the complete parameter space
-NUM_PASSES=1
-# The number of parallel jobs to spin up evenly across parameter space
-PARALLEL=5
+# Number of times to sweep through the complete lambda space
+RUNS_PER_LAMBDA=10
+
+# Logarithmic divisions of lambda space [ 10^L_MIN, 10^L_MAX ] per pass. SHOULD evenly divide MPI_NODES
+PARALLEL=2
+# Batch size
+Loops_per_call=$(expr $MPI_NODES / $PARALLEL)
+echo "We will iterate over ${Loops_per_call} row dimensions per function call"
+
 # The JAX platform to use
 PLATFORM="cpu"
 
@@ -52,32 +60,44 @@ vary_lambda_mpi() {
 
     JAX_PLATFORM_NAME="${PLATFORM}"
 
-    # An optional affine offset for the seeds to ensure orthogonal measurements
-    seed_indexer=6000
+    # An offset for the seeds to ensure orthogonal measurements
+    seed_indexer=$(( (run - 1) * Loops_per_call * PARALLEL ))
 
-    # Generate the command over the desired log spread of seeds
-    for s in $(seq $start $step $end); do
-        lambda=$(awk "BEGIN {print 10^($s)}")
-        current_seed=$((seed_indexer + ((PARALLEL + 1) * (run - 1))))
-        outd="${OUTPUT_BASE_DIR}/${outdir}/SEED_${current_seed}/"
+    for _ in $(seq 1 1 $Loops_per_call); do
 
-        command+=" -n 1 python ${exe} --seed ${current_seed} --out_path \"${outd}/SIZE_INF_${lambda}/\" --size_influence ${lambda} "
-        command+="--N_max ${MAX_HIDDEN_LAYER_SIZE} --epochs ${NUM_EPOCHS} --learning_rate ${LEARNING_RATE} :"
-        seed_indexer=$((seed_indexer + 1))
+        # Generate the command over the desired log spread of seeds
+        for s in $(seq $start $step $end); do
+            lambda=$(awk "BEGIN {print 10^($s)}")
+            current_seed=$((seed_indexer + ((PARALLEL) * (run - 1)) ))
+            outd="${OUTPUT_BASE_DIR}/${outdir}/SEED_${current_seed}/"
+
+            command+=" -n 1 python ${exe} --seed ${current_seed} --out_path \"${outd}\" --size_influence ${lambda} "
+            command+="--N_max ${MAX_HIDDEN_LAYER_SIZE} --epochs ${NUM_EPOCHS} --learning_rate ${LEARNING_RATE} :"
+            seed_indexer=$((seed_indexer + 1))
+        done
+
     done
 
     # Remove trailing colon
     command=${command%:}
     echo "Scanning through ${start} to ${end} with step size 10^${step}"
-    eval "${command}"
-    echo "Seed ${seed} training completed!"
+    echo "${command}"
+    echo "${Loops_per_call} batches of ${parallel} networks completed!"
 }
 
-lambdaStep=$(awk "BEGIN {print $((L_MAX - L_MIN)) / $PARALLEL}")
-echo -e "\nLambda step size: ${lambdaStep}\n\n"
+# PARALLEL - 1 is to create proper fenceposting
+lambdaStep=$(awk "BEGIN {print $((L_MAX - L_MIN)) / $((PARALLEL - 1))}")
 
-for run in $(seq 1 1 $NUM_PASSES); do
-    vary_lambda_mpi $run $BESSEL_STATIC_SCRIPT "STATIC_FINERUN_ORTHO" $L_MIN $L_MAX $lambdaStep
+echo -e "Lambda step size: ${lambdaStep}\n\n"
+
+# I'm fairly certain I could encorporate batches out here...
+# I know that if I repeat batch * (SPACE / step) times in the function,
+# I should account for that somehow in this outer loop
+total_runs=$(( RUNS_PER_LAMBDA ))
+echo "Total runs is ${total_runs}"
+
+for run in $(seq 1 $Loops_per_call $total_runs); do
+    vary_lambda_mpi $run $BESSEL_STANDARD_SCRIPT "STATIC_FINERUN_ORTHO" $L_MIN $L_MAX $lambdaStep
 done
 
 echo -e "\n\n\nAll training completed!"
