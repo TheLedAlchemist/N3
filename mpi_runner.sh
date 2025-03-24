@@ -35,6 +35,8 @@ PLATFORM="cpu"
 # Define paths to python scripts
 BESSEL_STANDARD_SCRIPT="./scripts/bessel_standard.py"
 BESSEL_STATIC_SCRIPT="./scripts/bessel_static.py"
+SIMPLE_STANDARD_SCRIPT="./scripts/simple_bessel_standard.py"
+SIMPLE_STATIC_SCRIPT="./scripts/simple_bessel_static.py"
 
 # Define the base output directory
 OUTPUT_BASE_DIR="./output"
@@ -81,7 +83,7 @@ vary_lambda_mpi() {
     # Remove trailing colon
     command=${command%:}
     echo "Scanning through ${start} to ${end} with step size 10^${step}"
-    echo "${command}"
+    eval "${command}"
     echo "${Loops_per_call} batches of ${parallel} networks completed!"
 }
 
@@ -90,14 +92,8 @@ lambdaStep=$(awk "BEGIN {print $((L_MAX - L_MIN)) / $((PARALLEL - 1))}")
 
 echo -e "Lambda step size: ${lambdaStep}\n\n"
 
-# I'm fairly certain I could encorporate batches out here...
-# I know that if I repeat batch * (SPACE / step) times in the function,
-# I should account for that somehow in this outer loop
-total_runs=$(( RUNS_PER_LAMBDA ))
-echo "Total runs is ${total_runs}"
-
-for run in $(seq 1 $Loops_per_call $total_runs); do
-    vary_lambda_mpi $run $BESSEL_STANDARD_SCRIPT "STATIC_FINERUN_ORTHO" $L_MIN $L_MAX $lambdaStep
+for run in $(seq 1 $Loops_per_call $RUNS_PER_LAMBDA); do
+    vary_lambda_mpi $run $SIMPLE_STANDARD_SCRIPT "Test" $L_MIN $L_MAX $lambdaStep
 done
 
-echo -e "\n\n\nAll training completed!"
+echo -e "\n\nAll training completed!"
